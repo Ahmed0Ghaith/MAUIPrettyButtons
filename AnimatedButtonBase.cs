@@ -32,7 +32,7 @@ public abstract class AnimatedButtonBase : ContentView
 
     public static readonly BindableProperty ButtonBackgroundColorProperty =
         BindableProperty.Create(nameof(ButtonBackgroundColor), typeof(Color), typeof(AnimatedButtonBase), Color.FromArgb("#6C63FF"),
-            propertyChanged: (b, _, n) => ((AnimatedButtonBase)b).OnButtonBackgroundColorChanged((Color)n));
+            propertyChanged: (b, _, n) => ((AnimatedButtonBase)b).Background = new SolidColorBrush((Color)n));
 
     public static readonly BindableProperty ShadowEnabledProperty =
         BindableProperty.Create(nameof(ShadowEnabled), typeof(bool), typeof(AnimatedButtonBase), true,
@@ -80,8 +80,8 @@ public abstract class AnimatedButtonBase : ContentView
 
     public Color ButtonBackgroundColor
     {
-        get => (Color)GetValue(ButtonBackgroundColorProperty);
-        set => SetValue(ButtonBackgroundColorProperty, value);
+        get => (Background as SolidColorBrush)?.Color ?? Colors.Transparent;
+        set => Background = new SolidColorBrush(value);
     }
 
     public bool ShadowEnabled
@@ -100,11 +100,21 @@ public abstract class AnimatedButtonBase : ContentView
 
     protected AnimatedButtonBase()
     {
+        Background ??= new SolidColorBrush(Color.FromArgb("#6C63FF"));
+
         var tap = new TapGestureRecognizer();
         tap.Tapped += OnTapped;
         GestureRecognizers.Add(tap);
         BuildContent();
         ApplyShadow(ShadowEnabled);
+
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Background))
+                OnButtonBackgroundChanged(Background);
+        };
+
+        OnButtonBackgroundChanged(Background);
     }
 
     // ── Abstract / Virtual ────────────────────────────────────────────────
@@ -113,7 +123,7 @@ public abstract class AnimatedButtonBase : ContentView
     protected abstract void BuildContent();
 
     protected virtual void OnCornerRadiusChanged(float radius) { }
-    protected virtual void OnButtonBackgroundColorChanged(Color color) { }
+    protected virtual void OnButtonBackgroundChanged(Brush? background) { }
     protected virtual void OnShadowChanged(bool enabled) => ApplyShadow(enabled);
     protected virtual void OnEnabledChanged(bool enabled) => Opacity = enabled ? 1.0 : 0.45;
 

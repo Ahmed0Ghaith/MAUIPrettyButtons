@@ -14,7 +14,7 @@
 |--------|-------------|
 | **LoadingButton** | Spins a loader and disables itself while `IsLoading = true` |
 | **FloatingActionButton** | Material FAB with bounce press, extended mode, and badge support |
-| **RippleButton** | Press-ripple wave radiating from center |
+| **RippleButton** | Press-ripple with selectable `Wave` or `Liquid` animation |
 | **PulseButton** | Continuously pulses to attract attention (great for CTAs) |
 | **ToggleButton** | Two-state button with smooth color/text crossfade |
 | **IconButton** | Icon-only in Filled, Ghost, or Outline style with optional label |
@@ -84,7 +84,7 @@ Add the XMLNS namespace to your XAML pages:
     LoadingText="Processing..."
     IsLoading="{Binding IsBusy}"
     Command="{Binding SubmitCommand}"
-    ButtonBackgroundColor="#6C63FF"
+    Background="#6C63FF"
     CornerRadius="14"
     SpinnerColor="White"
     PaddingButton="24,16" />
@@ -107,7 +107,7 @@ Add the XMLNS namespace to your XAML pages:
 <mab:FloatingActionButton
     Icon="+"
     Size="56"
-    ButtonBackgroundColor="#FF5252"
+    Background="#FF5252"
     Command="{Binding AddCommand}"
     BadgeCount="{Binding NotificationCount}" />
 
@@ -116,7 +116,7 @@ Add the XMLNS namespace to your XAML pages:
     Icon="+"
     Text="New Task"
     IsExtended="True"
-    ButtonBackgroundColor="#6C63FF" />
+    Background="#6C63FF" />
 ```
 
 | Property | Type | Default | Description |
@@ -137,7 +137,8 @@ Add the XMLNS namespace to your XAML pages:
     Text="Tap Me"
     RippleColor="White"
     RippleOpacity="0.35"
-    ButtonBackgroundColor="#00BCD4"
+    AnimationMode="Liquid"
+    Background="#00BCD4"
     CornerRadius="8" />
 ```
 
@@ -151,7 +152,7 @@ Add the XMLNS namespace to your XAML pages:
     IsPulsing="True"
     PulseScale="1.06"
     PulseDuration="900"
-    ButtonBackgroundColor="#FF5252" />
+    Background="#FF5252" />
 ```
 
 | Property | Type | Default | Description |
@@ -195,7 +196,7 @@ toggleBtn.Toggled += (s, isOn) => Console.WriteLine($"Now: {isOn}");
 <mab:IconButton
     Icon="★"
     ButtonStyle="Filled"
-    ButtonBackgroundColor="#FFC107"
+    Background="#FFC107"
     IconColor="White"
     IconSize="20" />
 
@@ -215,7 +216,7 @@ toggleBtn.Toggled += (s, isOn) => Console.WriteLine($"Now: {isOn}");
     Text="Confirm Payment"
     SuccessIcon="✓"
     ResetAfterMillis="2000"
-    ButtonBackgroundColor="#4CAF50"
+    Background="#4CAF50"
     Command="{Binding ConfirmCommand}" />
 ```
 
@@ -246,7 +247,8 @@ All buttons inherit from `AnimatedButtonBase` which exposes:
 | `PressScale` | double | 0.93 | Scale on press (0–1) |
 | `PressAnimationDuration` | uint | 100 | Press anim speed (ms) |
 | `CornerRadius` | float | 12 | Border corner radius |
-| `ButtonBackgroundColor` | Color | #6C63FF | Background fill |
+| `Background` | Brush | Solid #6C63FF | Button background (supports gradients) |
+| `ButtonBackgroundColor` | Color | #6C63FF | Legacy alias for solid color background |
 | `ShadowEnabled` | bool | true | Drop shadow |
 
 ### Events
@@ -264,7 +266,7 @@ button.Released += (s, e) => { };
 ```xml
 <ResourceDictionary>
     <Style TargetType="mab:LoadingButton">
-        <Setter Property="ButtonBackgroundColor" Value="{StaticResource PrimaryColor}" />
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
         <Setter Property="CornerRadius" Value="16" />
         <Setter Property="ShadowEnabled" Value="True" />
         <Setter Property="FontSize" Value="15" />

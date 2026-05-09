@@ -18,6 +18,12 @@ namespace MauiPrettyButtons.Controls;
 /// </summary>
 public class RippleButton : AnimatedButtonBase
 {
+    public enum RippleAnimationMode
+    {
+        Wave,
+        Liquid
+    }
+
     public static readonly BindableProperty TextProperty =
         BindableProperty.Create(nameof(Text), typeof(string), typeof(RippleButton), "Button",
             propertyChanged: (b, _, n) => ((RippleButton)b).UpdateLabel());
@@ -36,15 +42,20 @@ public class RippleButton : AnimatedButtonBase
     public static readonly BindableProperty RippleOpacityProperty =
         BindableProperty.Create(nameof(RippleOpacity), typeof(double), typeof(RippleButton), 0.35);
 
+    public static readonly BindableProperty AnimationModeProperty =
+        BindableProperty.Create(nameof(AnimationMode), typeof(RippleAnimationMode), typeof(RippleButton), RippleAnimationMode.Wave);
+
     public string Text { get => (string)GetValue(TextProperty); set => SetValue(TextProperty, value); }
     public Color TextColor { get => (Color)GetValue(TextColorProperty); set => SetValue(TextColorProperty, value); }
     public double FontSize { get => (double)GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
     public Color RippleColor { get => (Color)GetValue(RippleColorProperty); set => SetValue(RippleColorProperty, value); }
     public double RippleOpacity { get => (double)GetValue(RippleOpacityProperty); set => SetValue(RippleOpacityProperty, value); }
+    public RippleAnimationMode AnimationMode { get => (RippleAnimationMode)GetValue(AnimationModeProperty); set => SetValue(AnimationModeProperty, value); }
 
     private Border? _border;
     private Label? _label;
     private BoxView? _ripple;
+    private BoxView? _liquid;
     private Grid? _grid;
 
     protected override void BuildContent()
@@ -72,14 +83,26 @@ public class RippleButton : AnimatedButtonBase
             VerticalOptions = LayoutOptions.Center
         };
 
+        _liquid = new BoxView
+        {
+            Color = RippleColor,
+            Opacity = 0,
+            CornerRadius = 200,
+            WidthRequest = 30,
+            HeightRequest = 30,
+            Scale = 0.7,
+            HorizontalOptions = LayoutOptions.Center,
+            VerticalOptions = LayoutOptions.Center
+        };
+
         _grid = new Grid
         {
-            Children = { _ripple, _label }
+            Children = { _ripple, _liquid, _label }
         };
 
         _border = new Border
         {
-            BackgroundColor = ButtonBackgroundColor,
+            Background = Background,
             Padding = new Thickness(24, 14),
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
@@ -94,7 +117,25 @@ public class RippleButton : AnimatedButtonBase
 
     protected override async void OnButtonClicked()
     {
-        if (_ripple == null) return;
+        if (_ripple == null || _liquid == null) return;
+
+        if (AnimationMode == RippleAnimationMode.Liquid)
+        {
+            _liquid.CancelAnimations();
+            _liquid.Opacity = RippleOpacity + 0.15;
+            _liquid.Scale = 0.7;
+            _liquid.TranslationX = -28;
+
+            var swell = _liquid.ScaleTo(1.8, 230, Easing.CubicOut);
+            var drift = _liquid.TranslateTo(28, 0, 230, Easing.CubicInOut);
+            var liquidFade = _liquid.FadeTo(0, 260, Easing.CubicIn);
+            await Task.WhenAll(swell, drift, liquidFade);
+
+            _liquid.Scale = 0.7;
+            _liquid.TranslationX = 0;
+            return;
+        }
+
         _ripple.Opacity = RippleOpacity;
         _ripple.WidthRequest = 0;
         _ripple.HeightRequest = 0;
@@ -112,9 +153,9 @@ public class RippleButton : AnimatedButtonBase
         _label.FontSize = FontSize;
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c)
+    protected override void OnButtonBackgroundChanged(Brush? background)
     {
-        if (_border != null) _border.BackgroundColor = c;
+        if (_border != null) _border.Background = background;
     }
 
     protected override void OnCornerRadiusChanged(float r)
@@ -194,7 +235,7 @@ public class PulseButton : AnimatedButtonBase
 
         _border = new Border
         {
-            BackgroundColor = ButtonBackgroundColor,
+            Background = Background,
             Padding = new Thickness(24, 14),
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
@@ -244,9 +285,9 @@ public class PulseButton : AnimatedButtonBase
         _label.FontSize = FontSize;
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c)
+    protected override void OnButtonBackgroundChanged(Brush? background)
     {
-        if (_border != null) _border.BackgroundColor = c;
+        if (_border != null) _border.Background = background;
     }
 
     protected override void OnCornerRadiusChanged(float r)
@@ -459,7 +500,7 @@ public class IconButton : AnimatedButtonBase
         {
             container = new Border
             {
-                BackgroundColor = ButtonBackgroundColor,
+                Background = Background,
                 WidthRequest = IconSize + 20,
                 HeightRequest = IconSize + 20,
                 StrokeThickness = 0,
@@ -509,7 +550,7 @@ public class IconButton : AnimatedButtonBase
         }
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c) => Rebuild();
+    protected override void OnButtonBackgroundChanged(Brush? background) => Rebuild();
     protected override void OnCornerRadiusChanged(float r) => Rebuild();
 }
 
@@ -568,7 +609,7 @@ public class MorphButton : AnimatedButtonBase
 
         _border = new Border
         {
-            BackgroundColor = ButtonBackgroundColor,
+            Background = Background,
             Padding = new Thickness(24, 14),
             StrokeThickness = 0,
             WidthRequest = -1,
@@ -632,9 +673,9 @@ public class MorphButton : AnimatedButtonBase
         if (_label != null && !_morphed) _label.Text = Text;
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c)
+    protected override void OnButtonBackgroundChanged(Brush? background)
     {
-        if (_border != null) _border.BackgroundColor = c;
+        if (_border != null) _border.Background = background;
     }
 }
 
@@ -730,7 +771,7 @@ public class OutlinedButton : AnimatedButtonBase
         _border.StrokeThickness = StrokeThickness;
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c) { }
+    protected override void OnButtonBackgroundChanged(Brush? background) { }
 
     protected override void OnCornerRadiusChanged(float r)
     {

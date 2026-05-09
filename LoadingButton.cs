@@ -150,7 +150,7 @@ public class LoadingButton : AnimatedButtonBase
 
         _border = new Border
         {
-            BackgroundColor = ButtonBackgroundColor,
+            Background = Background,
             Padding = PaddingButton,
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
@@ -233,9 +233,9 @@ public class LoadingButton : AnimatedButtonBase
             };
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c)
+    protected override void OnButtonBackgroundChanged(Brush? background)
     {
-        if (_border != null) _border.BackgroundColor = c;
+        if (_border != null) _border.Background = background;
     }
 }
 

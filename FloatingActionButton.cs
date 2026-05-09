@@ -168,7 +168,7 @@ public class FloatingActionButton : AnimatedButtonBase
 
         _fabBorder = new Border
         {
-            BackgroundColor = ButtonBackgroundColor,
+            Background = Background,
             StrokeThickness = 0,
             WidthRequest = Size,
             HeightRequest = Size,
@@ -262,9 +262,9 @@ public class FloatingActionButton : AnimatedButtonBase
         _badgeLabel.Text = count > 99 ? "99+" : count.ToString();
     }
 
-    protected override void OnButtonBackgroundColorChanged(Color c)
+    protected override void OnButtonBackgroundChanged(Brush? background)
     {
-        if (_fabBorder != null) _fabBorder.BackgroundColor = c;
+        if (_fabBorder != null) _fabBorder.Background = background;
     }
 
     protected override void OnCornerRadiusChanged(float r) => UpdateExtended();

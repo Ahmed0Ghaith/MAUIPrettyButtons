@@ -1,8 +1,8 @@
 namespace MauiPrettyButtons.Controls;
 
 /// <summary>
-/// A button that shows a spinner animation while IsLoading is true.
-/// The text morphs to a loading indicator and back seamlessly.
+/// A button that shows the built-in <see cref="ActivityIndicator"/> while IsLoading is true.
+/// The label cross-fades to loading text and back seamlessly.
 ///
 /// XAML Usage:
 /// <code>
@@ -44,7 +44,7 @@ public class LoadingButton : AnimatedButtonBase
 
     public static readonly BindableProperty SpinnerColorProperty =
         BindableProperty.Create(nameof(SpinnerColor), typeof(Color), typeof(LoadingButton), Colors.White,
-            propertyChanged: (b, _, n) => ((LoadingButton)b)._spinner?.ApplyColor((Color)n));
+            propertyChanged: (b, _, n) => ((LoadingButton)b).ApplySpinnerColor((Color)n));
 
     public static readonly BindableProperty SpinnerSizeProperty =
         BindableProperty.Create(nameof(SpinnerSize), typeof(double), typeof(LoadingButton), 22.0,
@@ -114,21 +114,22 @@ public class LoadingButton : AnimatedButtonBase
 
     private Border? _border;
     private Label? _label;
-    private SpinnerView? _spinner;
+    private ActivityIndicator? _activityIndicator;
     private HorizontalStackLayout? _innerRow;
 
     // ── Build ──────────────────────────────────────────────────────────────
 
     protected override void BuildContent()
     {
-        _spinner = new SpinnerView
+        _activityIndicator = new ActivityIndicator
         {
             WidthRequest = SpinnerSize,
             HeightRequest = SpinnerSize,
             IsVisible = false,
+            IsRunning = false,
+            Color = SpinnerColor,
             Margin = new Thickness(0, 0, 8, 0)
         };
-        _spinner.ApplyColor(SpinnerColor);
 
         _label = new Label
         {
@@ -145,7 +146,7 @@ public class LoadingButton : AnimatedButtonBase
             VerticalOptions = LayoutOptions.Center,
             HorizontalOptions = LayoutOptions.Center,
             Spacing = 0,
-            Children = { _spinner, _label }
+            Children = { _activityIndicator, _label }
         };
 
         _border = new Border
@@ -155,7 +156,7 @@ public class LoadingButton : AnimatedButtonBase
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(CornerRadius)
+                CornerRadius = GetEffectiveCornerRadius()
             },
             Content = _innerRow
         };
@@ -167,7 +168,7 @@ public class LoadingButton : AnimatedButtonBase
 
     private async void OnIsLoadingChanged(bool loading)
     {
-        if (_label == null || _spinner == null) return;
+        if (_label == null || _activityIndicator == null) return;
 
         IsEnabledButton = !loading;
 
@@ -175,15 +176,15 @@ public class LoadingButton : AnimatedButtonBase
         {
             await _label.FadeTo(0, 120);
             _label.Text = LoadingText;
-            _spinner.IsVisible = true;
-            _spinner.Start();
+            _activityIndicator.IsVisible = true;
+            _activityIndicator.IsRunning = true;
             await _label.FadeTo(1, 120);
         }
         else
         {
             await _label.FadeTo(0, 120);
-            _spinner.Stop();
-            _spinner.IsVisible = false;
+            _activityIndicator.IsRunning = false;
+            _activityIndicator.IsVisible = false;
             _label.Text = Text;
             await _label.FadeTo(1, 120);
         }
@@ -212,11 +213,17 @@ public class LoadingButton : AnimatedButtonBase
 
     private void UpdateSpinnerSize(double s)
     {
-        if (_spinner != null)
+        if (_activityIndicator != null)
         {
-            _spinner.WidthRequest = s;
-            _spinner.HeightRequest = s;
+            _activityIndicator.WidthRequest = s;
+            _activityIndicator.HeightRequest = s;
         }
+    }
+
+    private void ApplySpinnerColor(Color color)
+    {
+        if (_activityIndicator != null)
+            _activityIndicator.Color = color;
     }
 
     private void UpdatePadding(Thickness t)
@@ -229,75 +236,12 @@ public class LoadingButton : AnimatedButtonBase
         if (_border != null)
             _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(r)
+                CornerRadius = GetEffectiveCornerRadius()
             };
     }
 
     protected override void OnButtonBackgroundChanged(Brush? background)
     {
         if (_border != null) _border.Background = background;
-    }
-}
-
-// ── Spinner Helper ─────────────────────────────────────────────────────────
-
-/// <summary>Internal arc-spinner using a rotating BoxView arc effect.</summary>
-internal class SpinnerView : ContentView
-{
-    private readonly Microsoft.Maui.Controls.Shapes.ArcSegment? _arc;
-    private bool _running;
-
-    public SpinnerView()
-    {
-        var ellipse = new Microsoft.Maui.Controls.Shapes.Ellipse
-        {
-            Stroke = new SolidColorBrush(Colors.White),
-            StrokeThickness = 3,
-            Fill = Brush.Transparent,
-            Opacity = 0.3
-        };
-
-        // Arc overlay to simulate spinner
-        var indicator = new BoxView
-        {
-            Color = Colors.White,
-            WidthRequest = 4,
-            HeightRequest = 4,
-            CornerRadius = 2,
-            HorizontalOptions = LayoutOptions.Start,
-            VerticalOptions = LayoutOptions.Start
-        };
-
-        Content = new Grid
-        {
-            Children = { ellipse, indicator }
-        };
-    }
-
-    public void ApplyColor(Color color)
-    {
-        // Color applied via opacity/tint
-        Opacity = 1;
-    }
-
-    public void Start()
-    {
-        if (_running) return;
-        _running = true;
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            while (_running)
-            {
-                await this.RotateTo(360, 700, Easing.Linear);
-                Rotation = 0;
-            }
-        });
-    }
-
-    public void Stop()
-    {
-        _running = false;
-        this.CancelAnimations();
-        Rotation = 0;
     }
 }

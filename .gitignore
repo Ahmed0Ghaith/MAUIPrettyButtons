@@ -6,3 +6,7 @@
 /bin
 /.vs/MAUI_Pretty_Buttons
 /_ReSharper.Caches
+/samples/MauiPrettyButtons.Sample/obj
+/samples/MauiPrettyButtons.Sample/bin
+.vs
+

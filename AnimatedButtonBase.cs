@@ -2,12 +2,32 @@ using System.Windows.Input;
 
 namespace MauiPrettyButtons.Controls;
 
+/// <summary>Visual feedback style when the button is pressed.</summary>
+public enum PressAnimationStyle
+{
+    /// <summary>Scale down slightly (default).</summary>
+    Scale,
+    /// <summary>Reduce opacity.</summary>
+    Opacity,
+    /// <summary>Scale and opacity together.</summary>
+    ScaleAndOpacity,
+    /// <summary>Move down slightly (material “sink”).</summary>
+    Sink,
+    /// <summary>Slight clockwise rotation.</summary>
+    Tilt,
+    /// <summary>Scale with a bouncy release curve.</summary>
+    Bounce
+}
+
 /// <summary>
 /// Base class for all animated buttons. Provides press scale animation,
 /// command binding, and shared styling properties.
 /// </summary>
 public abstract class AnimatedButtonBase : ContentView
 {
+    /// <summary>Use uniform <see cref="CornerRadius"/> for this corner (XAML-friendly default).</summary>
+    public const float InheritCornerRadius = -1f;
+
     // ── Bindable Properties ────────────────────────────────────────────────
 
     public static readonly BindableProperty CommandProperty =
@@ -26,9 +46,34 @@ public abstract class AnimatedButtonBase : ContentView
     public static readonly BindableProperty PressAnimationDurationProperty =
         BindableProperty.Create(nameof(PressAnimationDuration), typeof(uint), typeof(AnimatedButtonBase), (uint)100);
 
+    public static readonly BindableProperty PressAnimationStyleProperty =
+        BindableProperty.Create(nameof(PressAnimationStyle), typeof(PressAnimationStyle), typeof(AnimatedButtonBase), PressAnimationStyle.Scale);
+
     public static readonly BindableProperty CornerRadiusProperty =
         BindableProperty.Create(nameof(CornerRadius), typeof(float), typeof(AnimatedButtonBase), 12f,
-            propertyChanged: (b, _, n) => ((AnimatedButtonBase)b).OnCornerRadiusChanged((float)n));
+            propertyChanged: OnCornerRelatedPropertyChanged);
+
+    public static readonly BindableProperty CornerRadiusTopLeftProperty =
+        BindableProperty.Create(nameof(CornerRadiusTopLeft), typeof(float), typeof(AnimatedButtonBase), InheritCornerRadius,
+            propertyChanged: OnCornerRelatedPropertyChanged);
+
+    public static readonly BindableProperty CornerRadiusTopRightProperty =
+        BindableProperty.Create(nameof(CornerRadiusTopRight), typeof(float), typeof(AnimatedButtonBase), InheritCornerRadius,
+            propertyChanged: OnCornerRelatedPropertyChanged);
+
+    public static readonly BindableProperty CornerRadiusBottomLeftProperty =
+        BindableProperty.Create(nameof(CornerRadiusBottomLeft), typeof(float), typeof(AnimatedButtonBase), InheritCornerRadius,
+            propertyChanged: OnCornerRelatedPropertyChanged);
+
+    public static readonly BindableProperty CornerRadiusBottomRightProperty =
+        BindableProperty.Create(nameof(CornerRadiusBottomRight), typeof(float), typeof(AnimatedButtonBase), InheritCornerRadius,
+            propertyChanged: OnCornerRelatedPropertyChanged);
+
+    private static void OnCornerRelatedPropertyChanged(BindableObject bindable, object? oldValue, object? newValue)
+    {
+        if (bindable is AnimatedButtonBase a)
+            a.OnCornerRadiusChanged(a.CornerRadius);
+    }
 
     public static readonly BindableProperty ButtonBackgroundColorProperty =
         BindableProperty.Create(nameof(ButtonBackgroundColor), typeof(Color), typeof(AnimatedButtonBase), Color.FromArgb("#6C63FF"),
@@ -72,10 +117,44 @@ public abstract class AnimatedButtonBase : ContentView
         set => SetValue(PressAnimationDurationProperty, value);
     }
 
+    public PressAnimationStyle PressAnimationStyle
+    {
+        get => (PressAnimationStyle)GetValue(PressAnimationStyleProperty);
+        set => SetValue(PressAnimationStyleProperty, value);
+    }
+
     public float CornerRadius
     {
         get => (float)GetValue(CornerRadiusProperty);
         set => SetValue(CornerRadiusProperty, value);
+    }
+
+    /// <summary>Top-left corner radius, or <see cref="InheritCornerRadius"/> to use <see cref="CornerRadius"/>.</summary>
+    public float CornerRadiusTopLeft
+    {
+        get => (float)GetValue(CornerRadiusTopLeftProperty);
+        set => SetValue(CornerRadiusTopLeftProperty, value);
+    }
+
+    /// <summary>Top-right corner radius, or <see cref="InheritCornerRadius"/> to use <see cref="CornerRadius"/>.</summary>
+    public float CornerRadiusTopRight
+    {
+        get => (float)GetValue(CornerRadiusTopRightProperty);
+        set => SetValue(CornerRadiusTopRightProperty, value);
+    }
+
+    /// <summary>Bottom-left corner radius, or <see cref="InheritCornerRadius"/> to use <see cref="CornerRadius"/>.</summary>
+    public float CornerRadiusBottomLeft
+    {
+        get => (float)GetValue(CornerRadiusBottomLeftProperty);
+        set => SetValue(CornerRadiusBottomLeftProperty, value);
+    }
+
+    /// <summary>Bottom-right corner radius, or <see cref="InheritCornerRadius"/> to use <see cref="CornerRadius"/>.</summary>
+    public float CornerRadiusBottomRight
+    {
+        get => (float)GetValue(CornerRadiusBottomRightProperty);
+        set => SetValue(CornerRadiusBottomRightProperty, value);
     }
 
     public Color ButtonBackgroundColor
@@ -122,6 +201,20 @@ public abstract class AnimatedButtonBase : ContentView
     /// <summary>Subclasses build their visual content here.</summary>
     protected abstract void BuildContent();
 
+    /// <summary>
+    /// Resolved corner radii for masks (top-left, top-right, bottom-left, bottom-right).
+    /// Corners set to <see cref="InheritCornerRadius"/> use the uniform <see cref="CornerRadius"/> value.
+    /// </summary>
+    protected CornerRadius GetEffectiveCornerRadius()
+    {
+        double u = CornerRadius;
+        double tl = CornerRadiusTopLeft == InheritCornerRadius ? u : CornerRadiusTopLeft;
+        double tr = CornerRadiusTopRight == InheritCornerRadius ? u : CornerRadiusTopRight;
+        double bl = CornerRadiusBottomLeft == InheritCornerRadius ? u : CornerRadiusBottomLeft;
+        double br = CornerRadiusBottomRight == InheritCornerRadius ? u : CornerRadiusBottomRight;
+        return new CornerRadius(tl, tr, bl, br);
+    }
+
     protected virtual void OnCornerRadiusChanged(float radius) { }
     protected virtual void OnButtonBackgroundChanged(Brush? background) { }
     protected virtual void OnShadowChanged(bool enabled) => ApplyShadow(enabled);
@@ -139,7 +232,31 @@ public abstract class AnimatedButtonBase : ContentView
         if (_isPressed) return;
         _isPressed = true;
         Pressed?.Invoke(this, EventArgs.Empty);
-        await this.ScaleTo(PressScale, PressAnimationDuration, Easing.CubicOut);
+        uint d = PressAnimationDuration;
+        switch (PressAnimationStyle)
+        {
+            case PressAnimationStyle.Scale:
+            case PressAnimationStyle.Bounce:
+                await this.ScaleTo(PressScale, d, Easing.CubicOut);
+                break;
+            case PressAnimationStyle.Opacity:
+                await this.FadeTo(0.86, d, Easing.CubicOut);
+                break;
+            case PressAnimationStyle.ScaleAndOpacity:
+                await Task.WhenAll(
+                    this.ScaleTo(PressScale, d, Easing.CubicOut),
+                    this.FadeTo(0.88, d, Easing.CubicOut));
+                break;
+            case PressAnimationStyle.Sink:
+                await this.TranslateTo(0, 4, d, Easing.CubicOut);
+                break;
+            case PressAnimationStyle.Tilt:
+                await this.RotateTo(5, d, Easing.CubicOut);
+                break;
+            default:
+                await this.ScaleTo(PressScale, d, Easing.CubicOut);
+                break;
+        }
     }
 
     /// <summary>
@@ -150,7 +267,33 @@ public abstract class AnimatedButtonBase : ContentView
         if (!_isPressed) return;
         _isPressed = false;
         Released?.Invoke(this, EventArgs.Empty);
-        await this.ScaleTo(1.0, PressAnimationDuration, Easing.SpringOut);
+        uint d = PressAnimationDuration;
+        switch (PressAnimationStyle)
+        {
+            case PressAnimationStyle.Scale:
+                await this.ScaleTo(1.0, d, Easing.SpringOut);
+                break;
+            case PressAnimationStyle.Bounce:
+                await this.ScaleTo(1.0, (uint)(d + d / 2), Easing.BounceOut);
+                break;
+            case PressAnimationStyle.Opacity:
+                await this.FadeTo(1.0, d, Easing.SpringOut);
+                break;
+            case PressAnimationStyle.ScaleAndOpacity:
+                await Task.WhenAll(
+                    this.ScaleTo(1.0, d, Easing.SpringOut),
+                    this.FadeTo(1.0, d, Easing.SpringOut));
+                break;
+            case PressAnimationStyle.Sink:
+                await this.TranslateTo(0, 0, d, Easing.SpringOut);
+                break;
+            case PressAnimationStyle.Tilt:
+                await this.RotateTo(0, d, Easing.SpringOut);
+                break;
+            default:
+                await this.ScaleTo(1.0, d, Easing.SpringOut);
+                break;
+        }
     }
 
     // ── Shadow ────────────────────────────────────────────────────────────
@@ -169,7 +312,7 @@ public abstract class AnimatedButtonBase : ContentView
         }
         else
         {
-            Shadow = null;
+            ClearValue(ShadowProperty);
         }
     }
 

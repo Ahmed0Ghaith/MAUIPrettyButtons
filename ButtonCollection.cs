@@ -107,7 +107,7 @@ public class RippleButton : AnimatedButtonBase
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(CornerRadius)
+                CornerRadius = GetEffectiveCornerRadius()
             },
             Content = _grid
         };
@@ -163,7 +163,7 @@ public class RippleButton : AnimatedButtonBase
         if (_border != null)
             _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(r)
+                CornerRadius = GetEffectiveCornerRadius()
             };
     }
 }
@@ -240,7 +240,7 @@ public class PulseButton : AnimatedButtonBase
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(CornerRadius)
+                CornerRadius = GetEffectiveCornerRadius()
             },
             Content = _label
         };
@@ -295,7 +295,7 @@ public class PulseButton : AnimatedButtonBase
         if (_border != null)
             _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(r)
+                CornerRadius = GetEffectiveCornerRadius()
             };
     }
 }
@@ -379,7 +379,7 @@ public class ToggleButton : AnimatedButtonBase
             StrokeThickness = 0,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(CornerRadius)
+                CornerRadius = GetEffectiveCornerRadius()
             },
             Content = _label
         };
@@ -417,7 +417,7 @@ public class ToggleButton : AnimatedButtonBase
         if (_border != null)
             _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(r)
+                CornerRadius = GetEffectiveCornerRadius()
             };
     }
 }
@@ -504,7 +504,7 @@ public class IconButton : AnimatedButtonBase
                 WidthRequest = IconSize + 20,
                 HeightRequest = IconSize + 20,
                 StrokeThickness = 0,
-                StrokeShape = new Microsoft.Maui.Controls.Shapes.Ellipse(),
+                StrokeShape = CreateIconMaskShape(),
                 Content = iconLabel
             };
         }
@@ -517,7 +517,7 @@ public class IconButton : AnimatedButtonBase
                 HeightRequest = IconSize + 20,
                 Stroke = new SolidColorBrush(IconColor),
                 StrokeThickness = 2,
-                StrokeShape = new Microsoft.Maui.Controls.Shapes.Ellipse(),
+                StrokeShape = CreateIconMaskShape(),
                 Content = iconLabel
             };
         }
@@ -552,6 +552,20 @@ public class IconButton : AnimatedButtonBase
 
     protected override void OnButtonBackgroundChanged(Brush? background) => Rebuild();
     protected override void OnCornerRadiusChanged(float r) => Rebuild();
+
+    /// <summary>Circle when all corners are large enough; otherwise a per-corner rounded rectangle mask.</summary>
+    private Microsoft.Maui.Controls.Shapes.Shape CreateIconMaskShape()
+    {
+        double dim = IconSize + 20;
+        var cr = GetEffectiveCornerRadius();
+        bool uniform = cr.TopLeft == cr.TopRight && cr.TopLeft == cr.BottomLeft && cr.TopLeft == cr.BottomRight;
+        if (uniform && cr.TopLeft >= dim / 2.0 - 0.5)
+            return new Microsoft.Maui.Controls.Shapes.Ellipse();
+        return new Microsoft.Maui.Controls.Shapes.RoundRectangle
+        {
+            CornerRadius = cr
+        };
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -616,7 +630,7 @@ public class MorphButton : AnimatedButtonBase
             HeightRequest = 50,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(12)
+                CornerRadius = GetEffectiveCornerRadius()
             },
             Content = _label
         };
@@ -657,7 +671,7 @@ public class MorphButton : AnimatedButtonBase
         _label.FontSize = 15;
         _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
         {
-            CornerRadius = new CornerRadius(12)
+            CornerRadius = GetEffectiveCornerRadius()
         };
         _border.WidthRequest = -1;
         _border.Padding = new Thickness(24, 14);
@@ -676,6 +690,16 @@ public class MorphButton : AnimatedButtonBase
     protected override void OnButtonBackgroundChanged(Brush? background)
     {
         if (_border != null) _border.Background = background;
+    }
+
+    protected override void OnCornerRadiusChanged(float r)
+    {
+        if (_border == null || _morphed) return;
+
+        _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
+        {
+            CornerRadius = GetEffectiveCornerRadius()
+        };
     }
 }
 
@@ -748,7 +772,7 @@ public class OutlinedButton : AnimatedButtonBase
             StrokeThickness = StrokeThickness,
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(CornerRadius)
+                CornerRadius = GetEffectiveCornerRadius()
             },
             Content = _label
         };
@@ -778,7 +802,7 @@ public class OutlinedButton : AnimatedButtonBase
         if (_border != null)
             _border.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(r)
+                CornerRadius = GetEffectiveCornerRadius()
             };
     }
 }

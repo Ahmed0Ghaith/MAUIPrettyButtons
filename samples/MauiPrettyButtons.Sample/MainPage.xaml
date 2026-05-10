@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mab="http://MauiPrettyButtons.com/dotnet"
+             x:Class="MauiPrettyButtons.Sample.MainPage"
+             Title="MauiPrettyButtons Sample"
+             BackgroundColor="#0F172A">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,24" Spacing="14">
+
+            <Label Text="Maui Pretty Buttons"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="White" />
+
+            <Label Text="Showcase app for all controls, corner radius, and gradients."
+                   TextColor="#CBD5E1"
+                   FontSize="14" />
+
+            <mab:LoadingButton x:Name="SubmitBtn"
+                               Text="Submit Order"
+                               LoadingText="Submitting..."
+                               CornerRadius="18"
+                               CornerRadiusTopLeft="6"
+                               CornerRadiusTopRight="28"
+                               CornerRadiusBottomLeft="28"
+                               CornerRadiusBottomRight="6"
+                               SpinnerColor="White">
+                <mab:LoadingButton.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#7C3AED" Offset="0.0" />
+                        <GradientStop Color="#2563EB" Offset="1.0" />
+                    </LinearGradientBrush>
+                </mab:LoadingButton.Background>
+            </mab:LoadingButton>
+
+            <Label Text="Press animation styles (PressAnimationStyle)"
+                   TextColor="#94A3B8"
+                   FontSize="13"
+                   Margin="0,8,0,0" />
+
+            <HorizontalStackLayout Spacing="8">
+                <mab:OutlinedButton Text="Scale"
+                                    PressAnimationStyle="Scale"
+                                    CornerRadius="12"
+                                    StrokeColor="#38BDF8"
+                                    TextColor="#38BDF8"
+                                    FontSize="12" />
+                <mab:OutlinedButton Text="Opacity"
+                                    PressAnimationStyle="Opacity"
+                                    CornerRadius="12"
+                                    StrokeColor="#38BDF8"
+                                    TextColor="#38BDF8"
+                                    FontSize="12" />
+                <mab:OutlinedButton Text="Sink"
+                                    PressAnimationStyle="Sink"
+                                    CornerRadius="12"
+                                    StrokeColor="#38BDF8"
+                                    TextColor="#38BDF8"
+                                    FontSize="12" />
+                <mab:OutlinedButton Text="Tilt"
+                                    PressAnimationStyle="Tilt"
+                                    CornerRadius="12"
+                                    StrokeColor="#38BDF8"
+                                    TextColor="#38BDF8"
+                                    FontSize="12" />
+                <mab:OutlinedButton Text="Bounce"
+                                    PressAnimationStyle="Bounce"
+                                    CornerRadius="12"
+                                    StrokeColor="#38BDF8"
+                                    TextColor="#38BDF8"
+                                    FontSize="12" />
+            </HorizontalStackLayout>
+
+            <mab:OutlinedButton Text="Scale + opacity (combined)"
+                                PressAnimationStyle="ScaleAndOpacity"
+                                CornerRadius="14"
+                                StrokeColor="#FBBF24"
+                                TextColor="#FBBF24"
+                                HorizontalOptions="Start" />
+
+            <mab:RippleButton Text="Liquid Ripple"
+                              AnimationMode="Liquid"
+                              RippleColor="White"
+                              RippleOpacity="0.38"
+                              CornerRadius="28"
+                              TextColor="White">
+                <mab:RippleButton.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#06B6D4" Offset="0.0" />
+                        <GradientStop Color="#3B82F6" Offset="1.0" />
+                    </LinearGradientBrush>
+                </mab:RippleButton.Background>
+            </mab:RippleButton>
+
+            <mab:PulseButton Text="Pulse CTA"
+                             IsPulsing="True"
+                             CornerRadius="10"
+                             BackgroundColor="#EF4444" />
+
+            <mab:ToggleButton x:Name="FollowBtn"
+                              OffText="Follow"
+                              OnText="Following"
+                              CornerRadius="30"
+                              OffBackgroundColor="#8B5CF6"
+                              OnBackgroundColor="#10B981" />
+
+            <mab:FloatingActionButton Icon="+"
+                                      Text="Create"
+                                      IsExtended="True"
+                                      Size="58"
+                                      CornerRadius="16"
+                                      IconColor="White"
+                                      TextColor="White">
+                <mab:FloatingActionButton.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#F97316" Offset="0.0" />
+                        <GradientStop Color="#EF4444" Offset="1.0" />
+                    </LinearGradientBrush>
+                </mab:FloatingActionButton.Background>
+            </mab:FloatingActionButton>
+
+            <HorizontalStackLayout Spacing="12">
+                <mab:IconButton Icon="★"
+                                LabelText="Fav"
+                                ButtonStyle="Filled"
+                                CornerRadius="8"
+                                IconColor="White"
+                                BackgroundColor="#F59E0B" />
+
+                <mab:OutlinedButton Text="Details"
+                                    CornerRadius="18"
+                                    StrokeColor="#A78BFA"
+                                    TextColor="#A78BFA" />
+            </HorizontalStackLayout>
+
+            <mab:MorphButton Text="Confirm Payment"
+                             SuccessIcon="✓"
+                             CornerRadius="26"
+                             ResetAfterMillis="1800"
+                             BackgroundColor="#16A34A" />
+
+            <Label x:Name="InfoLabel"
+                   Text="Tap any button to test behavior."
+                   TextColor="#94A3B8"
+                   FontSize="13" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

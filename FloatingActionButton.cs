@@ -236,15 +236,24 @@ public class FloatingActionButton : AnimatedButtonBase
             _fabBorder.HeightRequest = Size;
             _fabBorder.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
             {
-                CornerRadius = new CornerRadius(Size / 2)
+                CornerRadius = GetEffectiveCornerRadius()
             };
         }
         else
         {
+            double half = Size / 2.0;
+            var cr = GetEffectiveCornerRadius();
+            bool useCircle = cr.TopLeft >= half - 0.5 && cr.TopRight >= half - 0.5
+                && cr.BottomLeft >= half - 0.5 && cr.BottomRight >= half - 0.5;
             _fabBorder.WidthRequest = Size;
             _fabBorder.HeightRequest = Size;
             _fabBorder.Padding = new Thickness(0);
-            _fabBorder.StrokeShape = new Microsoft.Maui.Controls.Shapes.Ellipse();
+            _fabBorder.StrokeShape = useCircle
+                ? new Microsoft.Maui.Controls.Shapes.Ellipse()
+                : new Microsoft.Maui.Controls.Shapes.RoundRectangle
+                {
+                    CornerRadius = cr
+                };
         }
     }
 
